@@ -65,6 +65,19 @@ auto main() -> int
          // contador atómico directory_counter en una unidad
          
          // [[BLOQUE DE CÓDIGO 1 A IMPLEMENTAR POR EL EQUIPO DE TRABAJO]]
+
+           if (fs::is_regular_file(pth)) {
+                auto ext = pth.extension().string();
+                auto size = fs::file_size(pth);
+
+                // Actualizamos el mapa parcial res
+                res[ext].num_files++;
+                res[ext].total_size += size;
+            } else if (fs::is_directory(pth)) {
+                // Incrementamos el contador de subdirectorios de manera atómica
+                directory_counter++;
+            }
+
       }
       return res;
    };
