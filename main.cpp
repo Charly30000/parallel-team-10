@@ -24,7 +24,6 @@ auto main() -> int
     pel::print("Please insert a root: ");
     auto root_str = std::string{};
     std::getline(std::cin, root_str);
-
     // inicializamos un objeto std::filesystem::path con dicha ruta:
     auto const root = fs::path{root_str};
     // comprobamos que se trate de un directorio:
@@ -67,6 +66,9 @@ auto main() -> int
             // [[BLOQUE DE CÓDIGO 1 A IMPLEMENTAR POR EL EQUIPO DE TRABAJO]]
             if (fs::is_regular_file(pth)) {
                 auto ext = pth.extension().string();
+                if (ext == "") {
+                    ext = "no_file_extension";
+                }
                 auto size = fs::file_size(pth);
 
                 // Actualizamos el mapa parcial res
@@ -97,15 +99,10 @@ auto main() -> int
 
     // [[BLOQUE DE CÓDIGO 2 A IMPLEMENTAR POR EL EQUIPO DE TRABAJO]]
 
-    //auto chunk_begin = processed_data.begin();
-    //auto chunk_end = chunk_begin + max_chunk_sz;
-
     for (std::size_t i = 0; i < num_futures; ++i) {
         auto chunk_begin = paths.begin() + i * max_chunk_sz;
         auto chunk_end = (i == num_futures - 1) ? paths.end() : chunk_begin + max_chunk_sz;
         futures.push_back(std::async(std::launch::async, generate_map, std::vector<fs::path>{chunk_begin, chunk_end}));
-        //chunk_begin = chunk_end;
-        //chunk_end += max_chunk_sz;
     }
 
     // --------------------------------------------------------------------------
@@ -141,13 +138,13 @@ auto main() -> int
         // [[BLOQUE DE CÓDIGO 5 A IMPLEMENTAR POR EL EQUIPO DE TRABAJO]]
         root_file += info.num_files;
         root_size += info.total_size;
-        pel::println("{:>15}: {:>8} files {:>16} bytes", ext, info.num_files, info.total_size);
+        pel::println("{:>20}: {:>8} files {:>16} bytes", ext, info.num_files, info.total_size);
     }
 
     // imprimimos la información total del directorio y el tiempo de ejecución:
     auto const stop = clock::now();
     auto const duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
-    pel::println("\n{:>15}: {:>8} files {:>16} bytes | {} folders [{} ms]",
+    pel::println("\n{:>20}: {:>8} files {:>16} bytes | {} folders [{} ms]",
                   "Total", root_file, root_size, directory_counter.load(), duration.count());
 
     return 0;
