@@ -97,15 +97,10 @@ auto main() -> int
 
     // [[BLOQUE DE CÓDIGO 2 A IMPLEMENTAR POR EL EQUIPO DE TRABAJO]]
 
-    //auto chunk_begin = processed_data.begin();
-    //auto chunk_end = chunk_begin + max_chunk_sz;
-
     for (std::size_t i = 0; i < num_futures; ++i) {
         auto chunk_begin = paths.begin() + i * max_chunk_sz;
         auto chunk_end = (i == num_futures - 1) ? paths.end() : chunk_begin + max_chunk_sz;
         futures.push_back(std::async(std::launch::async, generate_map, std::vector<fs::path>{chunk_begin, chunk_end}));
-        //chunk_begin = chunk_end;
-        //chunk_end += max_chunk_sz;
     }
 
     // --------------------------------------------------------------------------
