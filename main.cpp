@@ -93,7 +93,6 @@ auto main() -> int
     // dentro del mapa principal processed_data:
     auto process_map = [&](map_type const& partial_map) -> void {
         // [[BLOQUE DE CÓDIGO 3 A IMPLEMENTAR POR EL EQUIPO DE TRABAJO]]
-        
     };
 
     // empleando la función process_map, fusionamos el mapa generado por main y
