@@ -65,7 +65,17 @@ auto main() -> int
             // contador atómico directory_counter en una unidad
 
             // [[BLOQUE DE CÓDIGO 1 A IMPLEMENTAR POR EL EQUIPO DE TRABAJO]]
-            
+            if (fs::is_regular_file(pth)) {
+                auto ext = pth.extension().string();
+                auto size = fs::file_size(pth);
+
+                // Actualizamos el mapa parcial res
+                res[ext].num_files++;
+                res[ext].total_size += size;
+            } else if (fs::is_directory(pth)) {
+                // Incrementamos el contador de subdirectorios de manera atómica
+                directory_counter++;
+            }
         }
         return res;
     };
@@ -78,7 +88,7 @@ auto main() -> int
     auto const max_chunk_sz = paths.size() / hardw_threads;
 
     // vector de objetos std::future inicialmente vacío:
-    auto futures = std::vector<std::future<map_type>>{};
+    auto futures = std::vector<map_type>{};
 
     // dividimos el vector y lanzamos num_futures hilos adicionales para analizar
     // los bloques. Nuestro propósito es ejecutar generate_map asíncronamente en
@@ -87,19 +97,30 @@ auto main() -> int
 
     // [[BLOQUE DE CÓDIGO 2 A IMPLEMENTAR POR EL EQUIPO DE TRABAJO]]
 
+    for (std::size_t i = 0; i < num_futures; ++i) {
+        auto chunk_begin = paths.begin() + i * max_chunk_sz;
+        auto chunk_end = (i == num_futures - 1) ? paths.end() : chunk_begin + max_chunk_sz;
+        futures.push_back(generate_map(std::vector<fs::path>{chunk_begin, chunk_end}));
+    }
+
     // --------------------------------------------------------------------------
 
     // función lambda para fusionar un mapa parcial generado con generate_map
     // dentro del mapa principal processed_data:
     auto process_map = [&](map_type const& partial_map) -> void {
-        // [[BLOQUE DE CÓDIGO 3 A IMPLEMENTAR POR EL EQUIPO DE TRABAJO]]
+        for (auto const& [ext, info] : partial_map) {
+            processed_data[ext].num_files += info.num_files;
+            processed_data[ext].total_size += info.total_size;
+        }
     };
 
     // empleando la función process_map, fusionamos el mapa generado por main y
     // los obtenidos a través de cada objeto futuro dentro de processed_date:
 
     // [[BLOQUE DE CÓDIGO 4 A IMPLEMENTAR POR EL EQUIPO DE TRABAJO]]
-    
+    for (auto& future : futures) {
+        process_map(future);
+    }
 
     // --------------------------------------------------------------------------
 
@@ -112,7 +133,9 @@ auto main() -> int
     // root_size:
     for (auto const& [ext, info] : processed_data) {
         // [[BLOQUE DE CÓDIGO 5 A IMPLEMENTAR POR EL EQUIPO DE TRABAJO]]
-        
+        root_file += info.num_files;
+        root_size += info.total_size;
+        pel::println("{:>15}: {:>8} files {:>16} bytes", ext, info.num_files, info.total_size);
     }
 
     // imprimimos la información total del directorio y el tiempo de ejecución:
