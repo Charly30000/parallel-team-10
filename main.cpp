@@ -16,6 +16,8 @@ struct Extension_info
         total_size;
 };
 
+// -------------------------
+
 int main()
 {
     pel::print("Please insert a root: ");
@@ -28,7 +30,7 @@ int main()
         pel::print("You must indicate an actual directory");
         return 0;
     }
-
+    // -------------
     using clock = std::chrono::steady_clock;
     auto const start = clock::now();
 
@@ -38,8 +40,8 @@ int main()
         paths.push_back(pth);
     }
 
+    //-----------------------------------------------------------------
     std::uintmax_t directory_counter = 0;
-
     auto generate_map = [](const std::vector<fs::path> &paths, std::uintmax_t &directory_counter) -> std::map<std::string, Extension_info>
     {
         auto res = std::map<std::string, Extension_info>{};
@@ -62,8 +64,10 @@ int main()
 
         return res;
     };
-
+    // -----------------------------
     auto processed_data = generate_map(paths, directory_counter);
+
+    auto const stop = clock::now();
 
     auto root_file = std::uintmax_t{0};
     auto root_size = std::uintmax_t{0};
@@ -75,7 +79,6 @@ int main()
         pel::println("{:>15}: {:>8} files {:>16} bytes", ext, info.num_files, info.total_size);
     }
 
-    auto const stop = clock::now();
     auto const duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
     pel::println("\n{:>15}: {:>8} files {:>16} bytes | {} folders [{} ms]",
                  "Total", root_file, root_size, directory_counter, duration.count());
