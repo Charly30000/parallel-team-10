@@ -42,6 +42,7 @@ auto main() -> int
         paths.push_back(pth);
     }
 
+    // ------------------------------------------
     using map_type = std::map<std::string, Extension_info>;
     auto processed_data = map_type{};
 
@@ -67,12 +68,14 @@ auto main() -> int
         }
         return res;
     };
+    // -------------------------------------------------
 
     auto const hardw_threads = std::thread::hardware_concurrency();
     auto const num_futures = hardw_threads - 1;
     auto const max_chunk_sz = paths.size() / hardw_threads;
 
     auto futures = std::vector<std::future<map_type>>{};
+
 
     for (std::size_t i = 0; i < num_futures; ++i)
     {
@@ -81,6 +84,7 @@ auto main() -> int
         futures.push_back(std::async(std::launch::async, generate_map, std::vector<fs::path>{chunk_begin, chunk_end}));
     }
 
+    // -------------------------------------------------
     auto process_map = [&](map_type const &partial_map) -> void
     {
         for (auto const &[ext, info] : partial_map)
@@ -89,6 +93,8 @@ auto main() -> int
             processed_data[ext].total_size += info.total_size;
         }
     };
+    
+    // -------------------------------------------------
 
     for (auto &future : futures)
     {
@@ -97,6 +103,8 @@ auto main() -> int
 
     auto root_file = std::uintmax_t{0};
     auto root_size = std::uintmax_t{0};
+
+    // -------------------------------------------------
 
     for (auto const &[ext, info] : processed_data)
     {
